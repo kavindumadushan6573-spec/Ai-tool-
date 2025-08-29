@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sefoy AI Chat</title>
+    <style>
+        /* Google Fonts වෙතින් Inter ෆොන්ට් එක import කිරීම */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        :root {
+            --background-color: #ffffff;
+            --text-color: #000000;
+            --secondary-text-color: #666666;
+            --border-color: #eeeeee;
+            --button-bg-color: #f5f5f5;
+            --user-message-bg: #f0f0f0;
+            --ai-message-bg: #ffffff;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        .header .title-group {
+            text-align: center;
+            flex-grow: 1;
+        }
+
+        .header .title-group .main-title {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .header .title-group .sub-title {
+            font-size: 11px;
+            color: var(--secondary-text-color);
+        }
+
+        .header .icon {
+            width: 22px;
+            height: 22px;
+            color: var(--secondary-text-color);
+        }
+        
+        .header .header-icons {
+            display: flex;
+            gap: 16px;
+        }
+
+        .model-selectors-wrapper {
+            position: relative;
+            flex-shrink: 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .model-selectors {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 0;
+        }
+        
+        .selector-container {
+            position: relative;
+        }
+
+        .selector-btn {
+            background-color: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 5px 12px;
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .selector-btn:hover {
+            background-color: var(--button-bg-color);
+        }
+
+        .selector-btn svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* Dropdown Menu Styles */
+        .dropdown-menu {
+            display: none; /* Initially hidden */
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: 6px;
+            background-color: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            z-index: 10;
+            padding: 6px;
+            width: 120px;
+        }
+
+        .dropdown-menu button {
+            background: none;
+            border: none;
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 8px 12px;
+            font-size: 13px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .dropdown-menu button:hover {
+            background-color: var(--button-bg-color);
+        }
+
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow-y: auto; /* Enable scrolling for chat messages */
+        }
+        
+        #chat-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto; /* Center the chat messages */
+        }
+
+        .welcome-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            height: 100%;
+        }
+
+        .welcome-screen .logo-icon {
+            width: 40px;
+            height: 40px;
+            color: #000;
+            margin-bottom: 20px;
+        }
+
+        .welcome-screen h1 {
+            font-size: 26px;
+            font-weight: 700;
+            margin: 0 0 10px 0;
+            letter-spacing: -0.5px;
+        }
+
+        .welcome-screen p {
+            color: var(--secondary-text-color);
+            font-size: 14px;
+            line-height: 1.5;
+            max-width: 400px;
+            margin: 0 0 20px 0;
+        }
+
+        .welcome-screen .leaderboard-link {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 8px;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s;
+        }
+        .welcome-screen .leaderboard-link:hover {
+            border-bottom: 1px solid var(--text-color);
+        }
+
+        .welcome-screen .leaderboard-link svg {
+            width: 14px;
+            height: 14px;
+        }
+        
+        /* Chat Message Styles */
+        .chat-message {
+            padding: 12px 16px;
+            border-radius: 18px;
+            max-width: 80%;
+            line-height: 1.5;
+            font-size: 15px;
+            word-wrap: break-word;
+        }
+        
+        .user-message {
+            align-self: flex-end;
+            background-color: var(--user-message-bg);
+            border-bottom-right-radius: 4px;
+        }
+        
+        .ai-message {
+            align-self: flex-start;
+            background-color: var(--ai-message-bg);
+            border: 1px solid var(--border-color);
+            border-bottom-left-radius: 4px;
+        }
+
+        .loading-indicator {
+            align-self: flex-start;
+            color: var(--secondary-text-color);
+            font-style: italic;
+        }
+
+        .bottom-container {
+            padding: 16px;
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto;
+            box-sizing: border-box;
+            flex-shrink: 0;
+        }
+
+        .input-area {
+            display: flex;
+            align-items: center;
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 5px;
+            transition: box-shadow 0.2s;
+        }
+        .input-area:focus-within {
+             box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+        }
+
+        .input-area .icon-btn {
+            background: none;
+            border: none;
+            padding: 7px;
+            cursor: pointer;
+            color: var(--secondary-text-color);
+            display: flex;
+            align-items: center;
+            border-radius: 6px;
+        }
+        .input-area .icon-btn:hover {
+            background-color: var(--button-bg-color);
+        }
+
+        .input-area .icon-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .input-area input {
+            flex-grow: 1;
+            border: none;
+            outline: none;
+            font-size: 15px;
+            padding: 8px;
+            background-color: transparent;
+        }
+        
+        .input-area .send-btn {
+            background-color: var(--button-bg-color);
+            color: #aaa;
+            cursor: not-allowed;
+        }
+        .input-area .send-btn.active {
+            background-color: var(--text-color);
+            color: var(--background-color);
+            cursor: pointer;
+        }
+        .input-area .send-btn.active:hover {
+             background-color: #333;
+        }
+
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-top: 20px;
+            padding-bottom: 10px;
+        }
+
+        .footer-links a {
+            color: var(--secondary-text-color);
+            text-decoration: none;
+            font-size: 11px;
+            transition: color 0.2s;
+        }
+        .footer-links a:hover {
+            color: var(--text-color);
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+        </svg>
+        <div class="title-group">
+            <div class="main-title">Sefoy</div>
+            <div class="sub-title">lmsys.org</div>
+        </div>
+        <div class="header-icons">
+             <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.186 2.25 2.25 0 0 0-3.933 2.186Z" />
+            </svg>
+             <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+               <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m9.375 0-9.375 0" />
+             </svg>
+        </div>
+    </header>
+
+    <div class="model-selectors-wrapper">
+        <div class="model-selectors">
+            <div class="selector-container">
+                <button class="selector-btn" id="fast-btn">
+                    fast
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg>
+                </button>
+                <div id="fast-options" class="dropdown-menu">
+                    <button>advance</button>
+                    <button>Normal</button>
+                </div>
+            </div>
+            <div class="selector-container">
+                <button class="selector-btn" id="orbix-btn">
+                    orbix
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg>
+                </button>
+                 <div id="orbix-options" class="dropdown-menu">
+                    <button>voxa</button>
+                    <button>Axora</button>
+                    <button>Alron</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <main class="main-content" id="main-content">
+        <div id="chat-container">
+            <div class="welcome-screen">
+                <svg class="logo-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
+                </svg>
+                <h1>Prompt. Vote. Advance AI.</h1>
+                <p>simple ai browser with sefoy.</p>
+                <a href="#" class="leaderboard-link">
+                    go to chat
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                    </svg>
+                </a>
+            </div>
+             </div>
+    </main>
+
+    <div class="bottom-container">
+        <div class="input-area">
+            <button class="icon-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+            </button>
+             <button class="icon-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" /></svg>
+            </button>
+            <input type="text" id="userInput" placeholder="Ask anything...">
+            <button class="icon-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.122 2.122l7.81-7.81" /></svg>
+            </button>
+            <button class="icon-btn send-btn" id="sendBtn"> <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18" /></svg>
+            </button>
+        </div>
+        <nav class="footer-links">
+            <a href="#">How It Works</a>
+            <a href="#">About Us</a>
+            <a href="#">Join the Team</a>
+        </nav>
+    </div>
+
+<script>
+    // --- DOM මූලිකාංග ලබා ගැනීම ---
+    const chatContainer = document.getElementById('chat-container');
+    const userInput = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const mainContent = document.getElementById('main-content');
+    
+    // --- Dropdown මූලිකාංග ---
+    const fastBtn = document.getElementById('fast-btn');
+    const orbixBtn = document.getElementById('orbix-btn');
+    const fastOptions = document.getElementById('fast-options');
+    const orbixOptions = document.getElementById('orbix-options');
+
+    // --- API සැකසුම් ---
+    const apiKey = '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';
+    const apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
+    
+    let currentModel = 'meta-llama/llama-4-scout-17b-16e-instruct'; // Default model
+    let isFirstMessage = true;
+
+    // --- Event Listeners ---
+
+    // Send button එක ක්ලික් කළ විට
+    sendBtn.addEventListener('click', sendMessage);
+    // Input එකේ Enter press කළ විට
+    userInput.addEventListener('keyup', (event) => {
+        if (event.key === 'Enter') {
+            sendMessage();
+        }
+    });
+    
+    // Input එකේ text එකක් ඇති විට send button එක active කිරීම
+    userInput.addEventListener('input', () => {
+        if (userInput.value.trim() !== '') {
+            sendBtn.classList.add('active');
+        } else {
+            sendBtn.classList.remove('active');
+        }
+    });
+
+    // Dropdown මෙනු සඳහා Event Listeners
+    fastBtn.addEventListener('click', () => {
+        orbixOptions.style.display = 'none'; // අනෙක් menu එක වසන්න
+        fastOptions.style.display = fastOptions.style.display === 'block' ? 'none' : 'block';
+    });
+    
+    orbixBtn.addEventListener('click', () => {
+        fastOptions.style.display = 'none'; // අනෙක් menu එක වසන්න
+        orbixOptions.style.display = orbixOptions.style.display === 'block' ? 'none' : 'block';
+    });
+
+    // පිටත ක්ලික් කළ විට dropdown වැසීම
+    document.addEventListener('click', (event) => {
+        if (!fastBtn.contains(event.target) && !fastOptions.contains(event.target)) {
+            fastOptions.style.display = 'none';
+        }
+        if (!orbixBtn.contains(event.target) && !orbixOptions.contains(event.target)) {
+            orbixOptions.style.display = 'none';
+        }
+    });
+
+
+    // --- Functions ---
+
+    // පණිවිඩය යැවීමේ function එක
+    async function sendMessage() {
+        const userText = userInput.value.trim();
+        if (userText === '') return;
+
+        // පළමු පණිවිඩය නම්, welcome screen එක ඉවත් කිරීම
+        if (isFirstMessage) {
+            chatContainer.innerHTML = '';
+            isFirstMessage = false;
+        }
+
+        // User ගේ message එක UI එකට එකතු කිරීම
+        addMessageToUI(userText, 'user');
+        userInput.value = '';
+        sendBtn.classList.remove('active'); // Button එක නැවත inactive කිරීම
+
+        // AI response එක බලාපොරොත්තුවෙන් loading indicator එක පෙන්වීම
+        const loadingIndicator = addMessageToUI('typing...', 'loading');
+
+        try {
+            // API එකට request එක යැවීම
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model: currentModel,
+                    messages: [{ role: 'user', content: userText }]
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`API error! Status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            const aiText = data.choices[0].message.content;
+
+            // Loading indicator එක ඉවත් කර AI ගේ පිළිතුර එකතු කිරීම
+            loadingIndicator.remove();
+            addMessageToUI(aiText, 'ai');
+
+        } catch (error) {
+            console.error('Error fetching AI response:', error);
+            // Error එකක් ආවොත්, loading indicator එක ඉවත් කර error message එකක් පෙන්වීම
+             loadingIndicator.remove();
+            addMessageToUI('Sorry, something went wrong. Please try again.', 'ai');
+        }
+    }
+
+    // UI එකට message bubbles එකතු කිරීමේ function එක
+    function addMessageToUI(text, sender) {
+        const messageElement = document.createElement('div');
+        if (sender === 'user') {
+            messageElement.className = 'chat-message user-message';
+        } else if (sender === 'ai') {
+            messageElement.className = 'chat-message ai-message';
+        } else if (sender === 'loading') {
+            messageElement.className = 'loading-indicator';
+        }
+        
+        messageElement.textContent = text;
+        chatContainer.appendChild(messageElement);
+        
+        // අලුත්ම message එකට scroll කිරීම
+        mainContent.scrollTop = mainContent.scrollHeight;
+        return messageElement;
+    }
+
+</script>
+</body>
+  </html>
+  
