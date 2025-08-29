@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <title>මගේ පළවෙනි වෙබ් අඩවිය</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            background-color: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        p {
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>සාදරයෙන් පිළිගනිමු!</h1>
+        <p>මේ තියෙන්නේ මම GitHub Pages වලින් හදපු මගේම වෙබ් සයිට් එක.</p>
+    </div>
+</body>
+</html>
